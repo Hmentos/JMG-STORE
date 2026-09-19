@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JMG STORE — Moda cristã com estilo e propósito.">
+  <title>JMG STORE | Moda cristã com propósito</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="header">
+  <a class="brand" href="#inicio"><img src="JMG-LOGO.jpeg" alt="JMG Store"></a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+  <nav class="nav" id="mainNav">
+    <a href="#inicio">Início</a><a href="#categorias">Categorias</a><a href="#produtos">Produtos</a><a href="#sobre">Sobre nós</a>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" id="loginBtn" title="Minha conta">♙</button>
+    <button class="icon-btn" id="favoritesBtn" title="Favoritos">♡ <span id="favoriteCount">0</span></button>
+    <button class="icon-btn cart-btn" id="cartBtn" title="Carrinho">🛒 <span id="cartCount">0</span></button>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="inicio"><div class="hero-content"><span class="eyebrow">JMG STORE</span><h1>Vista sua fé.<br><span>Viva seu propósito.</span></h1><p>Moda cristã para quem carrega sua fé por onde vai.</p><a href="#produtos" class="btn btn-gold">Comprar agora</a></div></section>
+
+<section class="categories section" id="categorias"><div class="section-heading"><span class="eyebrow">Encontre seu estilo</span><h2>Nossas categorias</h2></div><div class="category-grid">
+<button class="category-card" data-category="Camisetas"><span>👕</span><strong>Camisetas</strong><small>Ver coleção</small></button>
+<button class="category-card" data-category="Blusas"><span>🧥</span><strong>Blusas</strong><small>Ver coleção</small></button>
+<button class="category-card" data-category="Bonés"><span>🧢</span><strong>Bonés</strong><small>Ver coleção</small></button>
+<button class="category-card" data-category="Pochetes"><span>🎒</span><strong>Pochetes</strong><small>Ver coleção</small></button>
+</div></section>
+
+<section class="products section" id="produtos">
+<div class="section-heading row-heading"><div><span class="eyebrow">Coleção JMG</span><h2>Produtos</h2></div>
+<div class="catalog-tools"><input id="searchInput" class="search" placeholder="🔍 Buscar produto..." type="search"><select id="categoryFilter" class="filter"><option value="Todos">Todas as categorias</option><option>Camisetas</option><option>Blusas</option><option>Bonés</option><option>Pochetes</option></select><select id="sortFilter" class="filter"><option value="featured">Destaques</option><option value="priceAsc">Menor preço</option><option value="priceDesc">Maior preço</option><option value="name">Nome</option></select></div></div>
+<div class="product-grid" id="productGrid"></div><div id="catalogEmpty" class="empty-state hidden">Nenhum produto encontrado.</div>
+</section>
+
+<section class="faith-banner" id="sobre"><div><span class="eyebrow">Nossa identidade</span><h2>Mais que roupa.<br>Uma mensagem.</h2><p>A JMG STORE nasceu para unir estilo, qualidade e fé em peças que representam aquilo em que acreditamos.</p></div><img src="JMG-ITENS.jpeg" alt="Produtos da JMG Store"></section>
+</main>
+
+<footer><div class="footer-brand"><img src="JMG-LOGO.jpeg" alt="JMG Store"><p>A loja da família cristã.</p></div><div><h3>JMG STORE</h3><a href="#categorias">Categorias</a><a href="#produtos">Produtos</a><a href="#sobre">Sobre nós</a></div><div><h3>Atendimento</h3><p>Segunda a sexta</p><p>08h às 18h</p><p>Frete fixo: <strong>R$ 15,00</strong></p></div></footer>
+
+<div class="modal-backdrop" id="modalBackdrop">
+<div class="modal" id="productModal"><button class="modal-close" data-close>×</button><div id="productDetail"></div></div>
+<div class="modal" id="cartModal"><button class="modal-close" data-close>×</button><span class="eyebrow">Seu pedido</span><h2>Carrinho</h2><div id="cartItems"></div><div class="cart-summary"><div><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div><div><span>Frete fixo</span><strong>R$ 15,00</strong></div><div class="total"><span>Total</span><strong id="total">R$ 15,00</strong></div></div><button class="btn btn-gold full" id="checkoutBtn">Finalizar pedido</button></div>
+<div class="modal" id="checkoutModal"><button class="modal-close" data-close>×</button><span class="eyebrow">Finalização</span><h2>Confira seu pedido</h2><p class="muted" id="checkoutStatus"></p><div class="checkout-box"><div id="checkoutItems"></div><div class="checkout-totals"><span>Subtotal</span><strong id="checkoutSubtotal"></strong><span>Frete</span><strong>R$ 15,00</strong><span class="total-label">Total</span><strong id="checkoutTotal"></strong></div></div><div class="checkout-box"><h3>Forma de pagamento</h3><label class="payment-option"><input type="radio" name="paymentMethod" value="Pix" checked> Pix</label><label class="payment-option"><input type="radio" name="paymentMethod" value="Cartão"> Cartão</label><label class="payment-option"><input type="radio" name="paymentMethod" value="Dinheiro"> Dinheiro</label></div><div class="checkout-box"><h3>Endereço</h3><div id="checkoutAddress" class="address-checkout">Carregando...</div><button class="text-btn" id="editAddressBtn">Editar endereço</button></div><button class="btn btn-gold full" id="whatsappCheckoutBtn">Enviar pedido pelo WhatsApp</button><p class="modal-note">O site não cobra o pagamento. O atendimento continuará pelo WhatsApp.</p></div>
+<div class="modal" id="accountModal"><button class="modal-close" data-close>×</button><span class="eyebrow">JMG STORE</span><h2>Minha conta</h2><div id="accountContent"></div></div>
+<div class="modal" id="ordersModal"><button class="modal-close" data-close>×</button><span class="eyebrow">Minha conta</span><h2>Meus pedidos</h2><div id="ordersContent"></div></div>
+<div class="modal" id="favoritesModal"><button class="modal-close" data-close>×</button><span class="eyebrow">Minha seleção</span><h2>Favoritos</h2><div id="favoritesContent"></div></div>
+<div class="modal" id="loginModal"><button class="modal-close" data-close>×</button><span class="eyebrow">JMG STORE</span><h2 id="authTitle">Entrar</h2><p class="muted" id="authMessage"></p><form id="authForm"><div id="registerFields" class="register-fields"><label>Nome completo<input id="fullName" required type="text" autocomplete="name"></label><label>Telefone<input id="phone" required type="tel" autocomplete="tel"></label><label>CEP<input id="cep" required type="text" maxlength="9" autocomplete="postal-code"></label><div id="addressPreview" class="address-preview"></div><label>Número<input id="addressNumber" required type="text" autocomplete="address-line2"></label><label>Complemento <small>(opcional)</small><input id="complement" type="text"></label></div><label>E-mail<input id="authEmail" required type="email" autocomplete="email"></label><label>Senha<input id="authPassword" required minlength="6" type="password" autocomplete="current-password"></label><button class="btn btn-gold full" id="authSubmit">Entrar</button></form><button class="forgot-link" id="forgotPasswordBtn">Esqueci minha senha</button><button class="btn btn-outline full" id="toggleAuth">Ainda não tenho conta</button><button class="btn btn-outline full hidden" id="backToLoginBtn">Voltar para entrar</button><button class="btn full hidden" id="logoutBtn">Sair da conta</button></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="script.js"></script>
+</body></html>
