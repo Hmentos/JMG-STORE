@@ -1,1 +1,113 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JMG STORE | Painel</title><link rel="stylesheet" href="styles.css"></head><body><header class="header"><a class="brand" href="index.html"><img src="JMG-LOGO.jpeg" alt="JMG Store"></a><strong style="margin:auto">PAINEL ADMINISTRATIVO</strong><a class="btn btn-outline" href="index.html">Voltar à loja</a></header><main class="section"><div id="adminLogin" class="modal" style="display:block;margin:auto"><span class="eyebrow">JMG STORE</span><h2>Acesso administrativo</h2><p class="muted">Entre com uma conta marcada como admin no Supabase.</p><form id="adminAuth"><label>E-mail<input id="adminEmail" type="email" required></label><label>Senha<input id="adminPassword" type="password" required></label><button class="btn btn-gold full">Entrar</button></form><p id="adminMsg" class="muted"></p></div><div id="adminPanel" class="hidden"><div class="row-heading"><div><span class="eyebrow">Gestão</span><h2>Produtos e pedidos</h2></div><button class="btn btn-outline" id="adminLogout">Sair</button></div><div class="admin-tabs"><button class="btn btn-gold" data-tab="products">Produtos</button><button class="btn btn-outline" data-tab="orders">Pedidos</button></div><section id="adminProducts"><div class="checkout-box"><h3>Novo produto</h3><form id="productForm" class="admin-form"><input type="hidden" id="productId"><label>Nome<input id="productName" required></label><label>Categoria<select id="productCategory"><option>Camisetas</option><option>Blusas</option><option>Bonés</option><option>Pochetes</option></select></label><label>Preço<input id="productPrice" type="number" step="0.01" required></label><label>Estoque<input id="productStock" type="number" min="0" required></label><label>Tamanhos<input id="productSizes" placeholder="P, M, G, GG"></label><label>Imagem URL<input id="productImage"></label><label>Descrição<textarea id="productDescription"></textarea></label><label>Etiqueta<input id="productTag" placeholder="Novo / Destaque"></label><label>Ícone<input id="productIcon" value="👕"></label><label><input id="productFeatured" type="checkbox"> Destaque</label><button class="btn btn-gold">Salvar produto</button><button type="button" class="btn btn-outline" id="clearProduct">Limpar</button></form></div><div id="adminProductList"></div></section><section id="adminOrders" class="hidden"><div id="adminOrderList"></div></section></div></main><div id="adminToast" class="toast"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="admin.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Painel administrativo da JMG STORE">
+  <title>JMG STORE | Painel Administrativo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div id="loading" class="loading-screen"><div class="spinner"></div><p>Carregando painel...</p></div>
+
+  <header class="admin-header">
+    <a class="admin-brand" href="index.html"><img src="JMG-LOGO.jpeg" alt="JMG Store"></a>
+    <div class="admin-title"><span>JMG STORE</span><strong>Painel administrativo</strong></div>
+    <div class="admin-actions">
+      <a class="btn btn-light" href="index.html">Ver loja</a>
+      <button class="btn btn-dark" id="logoutBtn">Sair</button>
+    </div>
+  </header>
+
+  <main class="admin-layout">
+    <aside class="sidebar">
+      <div class="admin-user-card">
+        <div class="avatar" id="adminAvatar">A</div>
+        <div><strong id="adminName">Administrador</strong><small id="adminEmailLabel">—</small></div>
+      </div>
+      <nav class="side-nav">
+        <button class="side-link active" data-section="dashboard">⌂ <span>Visão geral</span></button>
+        <button class="side-link" data-section="products">▣ <span>Produtos</span></button>
+        <button class="side-link" data-section="categories">◈ <span>Categorias</span></button>
+        <button class="side-link" data-section="orders">▤ <span>Pedidos</span></button>
+        <button class="side-link" data-section="customers">♙ <span>Clientes</span></button>
+      </nav>
+    </aside>
+
+    <section class="content">
+      <div id="message" class="message"></div>
+
+      <section class="page-section active" id="section-dashboard">
+        <div class="page-heading"><div><span class="eyebrow">Resumo</span><h1>Visão geral</h1><p>Acompanhe a JMG STORE pelo painel.</p></div><button class="btn btn-gold" id="refreshAll">↻ Atualizar</button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>Produtos</span><strong id="statProducts">0</strong><small>cadastrados</small></article>
+          <article class="stat-card"><span>Produtos ativos</span><strong id="statActive">0</strong><small>visíveis na loja</small></article>
+          <article class="stat-card"><span>Pedidos</span><strong id="statOrders">0</strong><small>registrados</small></article>
+          <article class="stat-card"><span>Clientes</span><strong id="statCustomers">0</strong><small>contas cadastradas</small></article>
+        </div>
+        <div class="dashboard-grid">
+          <div class="panel"><div class="panel-head"><h2>Pedidos recentes</h2><button class="text-btn" data-go="orders">Ver todos</button></div><div id="recentOrders" class="compact-list"></div></div>
+          <div class="panel"><div class="panel-head"><h2>Estoque baixo</h2><button class="text-btn" data-go="products">Gerenciar</button></div><div id="lowStock" class="compact-list"></div></div>
+        </div>
+      </section>
+
+      <section class="page-section" id="section-products">
+        <div class="page-heading"><div><span class="eyebrow">Catálogo</span><h1>Produtos</h1><p>Crie, edite, ative, desative e controle o estoque.</p></div><button class="btn btn-gold" id="newProductBtn">+ Novo produto</button></div>
+        <div class="toolbar"><input id="productSearch" class="search" placeholder="Buscar produto..."><select id="productStatusFilter"><option value="all">Todos</option><option value="active">Ativos</option><option value="inactive">Inativos</option><option value="low">Estoque baixo</option></select></div>
+        <div id="productsTable" class="table-wrap"></div>
+      </section>
+
+      <section class="page-section" id="section-categories">
+        <div class="page-heading"><div><span class="eyebrow">Organização</span><h1>Categorias</h1><p>As categorias aparecem automaticamente na loja.</p></div></div>
+        <div class="split-grid"><div class="panel"><h2>Nova categoria</h2><form id="categoryForm" class="form-grid"><label>Nome<input id="categoryName" required placeholder="Ex.: Camisetas"></label><button class="btn btn-gold" type="submit">Adicionar categoria</button></form></div><div class="panel"><h2>Categorias cadastradas</h2><div id="categoriesList"></div></div></div>
+      </section>
+
+      <section class="page-section" id="section-orders">
+        <div class="page-heading"><div><span class="eyebrow">Vendas</span><h1>Pedidos</h1><p>Veja os pedidos, endereço, itens e atualize o status.</p></div></div>
+        <div class="toolbar"><input id="orderSearch" class="search" placeholder="Buscar por número, cliente ou status..."><select id="orderStatusFilter"><option value="all">Todos os status</option><option value="received">Recebido</option><option value="preparing">Preparando</option><option value="shipped">Enviado</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option></select></div>
+        <div id="ordersList" class="orders-list"></div>
+      </section>
+
+      <section class="page-section" id="section-customers">
+        <div class="page-heading"><div><span class="eyebrow">Pessoas</span><h1>Clientes</h1><p>Consulte os cadastros e o nível de acesso.</p></div></div>
+        <div class="toolbar"><input id="customerSearch" class="search" placeholder="Buscar por nome, e-mail ou telefone..."></div>
+        <div id="customersTable" class="table-wrap"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal large-modal">
+      <button class="modal-close" data-close="productModal">×</button>
+      <div class="modal-heading"><div><span class="eyebrow">Catálogo</span><h2 id="productModalTitle">Novo produto</h2></div></div>
+      <form id="productForm" class="product-form">
+        <input type="hidden" id="productId">
+        <div class="form-grid two">
+          <label>Nome do produto<input id="productName" required></label>
+          <label>Categoria<select id="productCategory" required></select></label>
+          <label>Preço (R$)<input id="productPrice" type="number" min="0" step="0.01" required></label>
+          <label>Estoque<input id="productStock" type="number" min="0" step="1" required></label>
+          <label>Tamanhos <small>ex.: P, M, G, GG</small><input id="productSizes" placeholder="P, M, G, GG"></label>
+          <label>Imagem (URL)<input id="productImage" placeholder="https://..." autocomplete="off"><small class="muted">Cole o link direto da imagem. Upload de arquivo será adicionado na próxima etapa.</small></label>
+          <label>Etiqueta <small>ex.: Novo, Promoção</small><input id="productTag"></label>
+          <label>Ícone <small>emoji opcional</small><input id="productIcon" placeholder="👕"></label>
+        </div>
+        <label>Descrição<textarea id="productDescription" rows="4" placeholder="Descrição do produto..."></textarea></label>
+        <div id="imagePreview" class="image-preview"><span>Prévia da imagem</span></div>
+        <div class="checks"><label class="check"><input id="productActive" type="checkbox" checked><span>Produto ativo na loja</span></label><label class="check"><input id="productFeatured" type="checkbox"><span>Produto em destaque</span></label></div>
+        <div class="modal-actions"><button type="button" class="btn btn-light" data-close="productModal">Cancelar</button><button type="submit" class="btn btn-gold">Salvar produto</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="orderModal"><div class="modal large-modal"><button class="modal-close" data-close="orderModal">×</button><div id="orderDetails"></div></div></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js?v=4"></script>
+</body>
+</html>

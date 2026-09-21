@@ -51,6 +51,7 @@ language sql
 stable
 security definer
 set search_path = public
+set row_security = off
 as $$
   select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
 $$;
@@ -67,6 +68,12 @@ create policy "Admins can read all profiles" on public.profiles for select using
 
 drop policy if exists "Admins can read all orders" on public.orders;
 create policy "Admins can read all orders" on public.orders for select using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "Admins can manage orders" on public.orders;
+create policy "Admins can manage orders" on public.orders
+for all to authenticated
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "Admins can update orders" on public.orders;
 create policy "Admins can update orders" on public.orders for update using (public.is_admin()) with check (public.is_admin());
