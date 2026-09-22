@@ -1,0 +1,23 @@
+JMG STORE - CHECKLIST FINAL
+
+[OK] Nomes dos arquivos padronizados (sem "(1)")
+[OK] index.html aponta para styles.css, supabase-config.js e script.js
+[OK] admin.html aponta para admin.css, supabase-config.js e admin.js
+[OK] Login/cadastro corrigido para não ser bloqueado por campos ocultos required
+[OK] Status novo de pedido padronizado para "received"
+[OK] Painel aceita e exibe status em português
+[OK] SQL permite 2 administradores iniciais
+[OK] SQL permite múltiplos administradores depois pelo painel
+[OK] RLS do profiles permite admin gerenciar níveis de acesso
+[OK] Proteção adicionada para cliente não promover a própria conta
+[OK] RLS de produtos/categorias permite catálogo público
+[OK] RLS de pedidos/itens/endereço/perfil revisada
+[OK] Tamanhos continuam sendo enviados como text[]
+[OK] WhatsApp: 5511976935076
+[OK] Frete: R$ 15,00
+
+ANTES DE PUBLICAR:
+1. Edite os 2 e-mails na seção 24 de supabase_upgrade.sql.
+2. Execute o SQL no Supabase.
+3. Faça logout/login novamente.
+4. Teste index.html e admin.html.

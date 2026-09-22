@@ -125,6 +125,20 @@ const money = (n) =>
     currency: "BRL"
   });
 
+const orderStatusLabel = (status) =>
+  ({
+    received: "Recebido",
+    preparing: "Preparando",
+    shipped: "Enviado",
+    completed: "Concluído",
+    cancelled: "Cancelado",
+    recebido: "Recebido",
+    preparando: "Preparando",
+    enviado: "Enviado",
+    concluído: "Concluído",
+    cancelado: "Cancelado"
+  }[status] || status || "Recebido");
+
 function toast(msg) {
   const t = $("#toast");
   if (!t) return;
@@ -654,7 +668,7 @@ async function createOrder(user, payment) {
     .insert({
       user_id: user.id,
       address_id: a.id,
-      status: "recebido",
+      status: "received",
       subtotal,
       shipping: SHIPPING_FEE,
       total,
@@ -1304,7 +1318,7 @@ async function loadOrders() {
             <strong>Pedido #${o.id}</strong>
             <span>${new Date(o.created_at).toLocaleDateString("pt-BR")}</span>
           </div>
-          <span class="status-pill">${o.status}</span>
+          <span class="status-pill">${orderStatusLabel(o.status)}</span>
           <div>
             ${(o.order_items || [])
               .map(
@@ -1321,10 +1335,6 @@ async function loadOrders() {
       `
     )
     .join("");
-}
-
-if (loginBtn) {
-  loginBtn.addEventListener("dblclick", showAccount);
 }
 
 supabaseClient.auth.onAuthStateChange((event) => {

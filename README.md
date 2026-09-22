@@ -1,34 +1,62 @@
-# JMG STORE — projeto completo
+# JMG STORE — projeto final revisado
 
-Projeto de teste da JMG STORE com Supabase e fechamento de pedido pelo WhatsApp.
+Projeto da JMG STORE com Supabase, checkout via WhatsApp e painel administrativo.
 
-## O que já foi adicionado
+## O que está incluído
 - Cadastro/login com Supabase Auth.
 - Recuperação e redefinição de senha.
 - CEP automático via ViaCEP.
 - Catálogo com busca, categorias e ordenação.
-- Página/modal individual do produto.
-- Tamanhos, quantidade e controle visual de estoque.
-- Carrinho com alteração de quantidade.
-- Favoritos.
+- Produto com tamanho, quantidade e estoque.
+- Carrinho e favoritos locais.
 - Minha conta e histórico de pedidos.
 - Checkout com Pix, cartão ou dinheiro.
 - Frete fixo de R$ 15,00.
-- Registro do pedido no Supabase e envio do resumo para o WhatsApp **(11) 97693-5076**.
-- Painel administrativo em `admin.html` para produtos e status dos pedidos.
-- Layout responsivo para celular.
+- Registro do pedido no Supabase e envio do resumo para o WhatsApp (11) 97693-5076.
+- Painel administrativo (`admin.html`) para produtos, categorias, pedidos, clientes e níveis de acesso.
+- Suporte a 2 administradores iniciais e a múltiplos admins depois pelo painel.
 
-## Antes de usar os novos recursos do banco
-1. Abra o **SQL Editor** do Supabase.
-2. Execute o arquivo `supabase_upgrade.sql`.
-3. Para transformar sua conta em administradora, altere o e-mail no final do SQL e execute o `update` indicado.
-4. Não coloque a `service_role`/secret key no projeto. O arquivo `supabase-config.js` usa somente a Publishable key.
+## PASSO OBRIGATÓRIO — configurar os 2 administradores
+1. Crie as duas contas normalmente na loja ou em **Supabase > Authentication > Users**.
+2. Abra `supabase_upgrade.sql`.
+3. Vá até a seção **24. DEFINIR OS 2 ADMINISTRADORES**.
+4. Troque:
+   - `PRIMEIRO_ADMIN@gmail.com`
+   - `SEGUNDO_ADMIN@gmail.com`
+   pelos dois e-mails reais.
+5. Execute o arquivo inteiro no **Supabase SQL Editor**.
+6. No resultado da seção 25, confirme que as contas aparecem com `role = admin` e que `auth_id = profile_id`.
+7. Saia da conta na loja, faça login novamente e depois abra `admin.html`.
 
-## Produtos de teste
-O SQL cria produtos de teste sem fotos. Quando você tiver as fotos reais, poderá cadastrá-las pelo painel administrativo usando uma URL de imagem.
+## Banco / RLS
+O SQL revisado inclui políticas para:
+- leitura pública de produtos ativos e categorias;
+- clientes criarem/consultarem os próprios pedidos;
+- clientes criarem/alterarem o próprio perfil e endereço;
+- admins gerenciarem produtos, categorias, pedidos, itens e perfis;
+- proteção para impedir cliente comum de promover a própria conta a admin.
 
-## Painel
-Abra `admin.html` no mesmo local do `index.html` e entre com a conta que recebeu `role = 'admin'` no Supabase.
+## Status dos pedidos
+Os valores internos foram padronizados para:
+- `received`
+- `preparing`
+- `shipped`
+- `completed`
+- `cancelled`
 
-## Importante sobre o cadastro
-Para criar a conta e entrar sem confirmação de e-mail, mantenha o provedor Email ativado e a confirmação de e-mail desativada no Supabase, como você configurou.
+A interface continua mostrando os nomes em português.
+
+## Arquivos principais
+- `index.html`
+- `styles.css`
+- `script.js`
+- `admin.html`
+- `admin.css`
+- `admin.js`
+- `supabase-config.js`
+- `supabase_upgrade.sql`
+- `JMG-LOGO.jpeg`
+- `JMG-ITENS.jpeg`
+
+## Segurança
+O projeto usa somente a Publishable key no navegador. Nunca coloque a `service_role`/secret key nos arquivos públicos.
