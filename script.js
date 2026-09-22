@@ -11,7 +11,7 @@ const DEMO_PRODUCTS = [
     id: 1,
     name: "Camiseta Fé & Propósito",
     category: "Camisetas",
-    price: 79.90,
+    price: 79.9,
     stock: 10,
     sizes: ["P", "M", "G", "GG"],
     description: "Modelo de teste da coleção JMG.",
@@ -23,7 +23,7 @@ const DEMO_PRODUCTS = [
     id: 2,
     name: "Camiseta Graça",
     category: "Camisetas",
-    price: 79.90,
+    price: 79.9,
     stock: 8,
     sizes: ["P", "M", "G", "GG"],
     description: "Modelo de teste da coleção JMG.",
@@ -35,7 +35,7 @@ const DEMO_PRODUCTS = [
     id: 3,
     name: "Blusa Caminho",
     category: "Blusas",
-    price: 119.90,
+    price: 119.9,
     stock: 6,
     sizes: ["P", "M", "G", "GG"],
     description: "Modelo de teste da coleção JMG.",
@@ -47,7 +47,7 @@ const DEMO_PRODUCTS = [
     id: 4,
     name: "Blusa Faith",
     category: "Blusas",
-    price: 119.90,
+    price: 119.9,
     stock: 7,
     sizes: ["P", "M", "G", "GG"],
     description: "Modelo de teste da coleção JMG.",
@@ -59,7 +59,7 @@ const DEMO_PRODUCTS = [
     id: 5,
     name: "Boné JMG",
     category: "Bonés",
-    price: 59.90,
+    price: 59.9,
     stock: 12,
     sizes: ["Único"],
     description: "Modelo de teste da coleção JMG.",
@@ -71,7 +71,7 @@ const DEMO_PRODUCTS = [
     id: 6,
     name: "Boné Fé",
     category: "Bonés",
-    price: 59.90,
+    price: 59.9,
     stock: 9,
     sizes: ["Único"],
     description: "Modelo de teste da coleção JMG.",
@@ -83,7 +83,7 @@ const DEMO_PRODUCTS = [
     id: 7,
     name: "Pochete JMG",
     category: "Pochetes",
-    price: 69.90,
+    price: 69.9,
     stock: 11,
     sizes: ["Único"],
     description: "Modelo de teste da coleção JMG.",
@@ -95,7 +95,7 @@ const DEMO_PRODUCTS = [
     id: 8,
     name: "Pochete Propósito",
     category: "Pochetes",
-    price: 69.90,
+    price: 69.9,
     stock: 5,
     sizes: ["Único"],
     description: "Modelo de teste da coleção JMG.",
@@ -235,8 +235,9 @@ function renderProducts() {
   if (sort === "priceAsc") list.sort((a, b) => a.price - b.price);
   if (sort === "priceDesc") list.sort((a, b) => b.price - a.price);
   if (sort === "name") list.sort((a, b) => a.name.localeCompare(b.name));
-  if (sort === "featured")
+  if (sort === "featured") {
     list.sort((a, b) => Number(b.featured) - Number(a.featured));
+  }
 
   const empty = $("#catalogEmpty");
   if (empty) empty.classList.toggle("hidden", !!list.length);
@@ -776,11 +777,16 @@ const authPasswordInput = $("#authPassword");
 
 function configureRegisterFields(enabled) {
   const fields = [fullNameInput, phoneInput, cepInput, addressNumberInput];
+
   fields.forEach((field) => {
     if (!field) return;
-    field.required = enabled;
+    field.required = !!enabled;
     field.disabled = !enabled;
+    if (!enabled) {
+      field.removeAttribute("required");
+    }
   });
+
   if (complementInput) {
     complementInput.disabled = !enabled;
   }
@@ -823,6 +829,7 @@ function setAuthMode(mode) {
 
   if (edit) {
     authPasswordInput.required = false;
+    authPasswordInput.removeAttribute("required");
     authPasswordInput.value = "";
     if (passwordLabel) passwordLabel.classList.add("hidden");
     if (authEmailInput) {
@@ -842,6 +849,10 @@ function setAuthMode(mode) {
     }
   }
 
+  if (authForm) {
+    authForm.noValidate = !showRegister;
+  }
+
   configureRegisterFields(showRegister);
 }
 
@@ -856,6 +867,7 @@ function setForgotMode() {
   backToLoginBtn.textContent = "Voltar para entrar";
   authSubmit.textContent = "Enviar link";
   authPasswordInput.required = false;
+  authPasswordInput.removeAttribute("required");
   authPasswordInput.value = "";
   const passwordLabel = authPasswordInput?.closest("label");
   if (passwordLabel) passwordLabel.classList.add("hidden");
@@ -863,6 +875,7 @@ function setForgotMode() {
     authEmailInput.readOnly = false;
     authEmailInput.style.opacity = "";
   }
+  if (authForm) authForm.noValidate = true;
   configureRegisterFields(false);
 }
 
@@ -886,6 +899,7 @@ function setResetMode() {
     authEmailInput.readOnly = false;
     authEmailInput.style.opacity = "";
   }
+  if (authForm) authForm.noValidate = true;
   configureRegisterFields(false);
 }
 
@@ -1056,10 +1070,16 @@ async function saveCustomer(user, d) {
 }
 
 if (authForm) {
+  authForm.setAttribute("novalidate", "novalidate");
+
   authForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     authSubmit.disabled = true;
     authMessage.textContent = "";
+
+    if (authMode !== "register" && authMode !== "edit") {
+      configureRegisterFields(false);
+    }
 
     try {
       const email = $("#authEmail").value.trim();
@@ -1092,6 +1112,9 @@ if (authForm) {
       }
 
       if (authMode === "login") {
+        if (!email || !password) {
+          throw new Error("Digite e-mail e senha.");
+        }
         const { data, error } = await supabaseClient.auth.signInWithPassword({
           email,
           password
@@ -1111,9 +1134,11 @@ if (authForm) {
       if (!fullName || !phone || cep.length !== 8 || !number) {
         throw new Error("Preencha nome, telefone, CEP e número.");
       }
+
       if (!addressPreview.dataset.street) {
         await lookupCep();
       }
+
       if (!addressPreview.dataset.street) {
         throw new Error("Informe um CEP válido.");
       }
@@ -1225,10 +1250,12 @@ async function showAccount() {
       openEditAccount();
     });
   }
+
   const ordersBtn = $("#myOrdersBtn");
   if (ordersBtn) {
     ordersBtn.addEventListener("click", () => loadOrders());
   }
+
   const accountLogout = $("#accountLogoutBtn");
   if (accountLogout) {
     accountLogout.addEventListener("click", async () => {
@@ -1259,6 +1286,7 @@ async function loadOrders() {
     content.textContent = "Não foi possível carregar seus pedidos.";
     return;
   }
+
   if (!data?.length) {
     content.innerHTML = `
       <div class="empty-state">
