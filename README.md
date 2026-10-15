@@ -1,3 +1,44 @@
+# Atualização: envio de imagens do dispositivo
+
+## Para atualizar a loja que já está funcionando
+1. Faça uma cópia da pasta atual do site.
+2. Extraia este pacote e substitua os arquivos correspondentes na pasta do site.
+   Todos os nomes já estão corretos, sem números entre parênteses.
+3. No SQL Editor do seu projeto Supabase, execute apenas
+   `ativar-upload-imagens.sql`, caso ainda não tenha executado essa atualização.
+   Não é necessário executar o upgrade completo ou configurar administradores
+   novamente apenas para ativar o upload.
+4. Atualize o painel (Ctrl + F5), entre como administrador e abra Produtos.
+5. Crie ou edite um produto, escolha a imagem do dispositivo e salve.
+6. Confira a imagem no painel e na vitrine.
+
+Seu arquivo supabase-config.js foi preservado exatamente como enviado.
+As duas imagens originais da loja estão incluídas no pacote.
+
+## Imagens dos produtos
+- Uma imagem por produto, com prévia antes de salvar.
+- JPG, PNG, WebP e GIF de até 5 MB.
+- A opção de colar um link continua disponível.
+- Cancelar seleção restaura a prévia do link anterior.
+- O upload ocorre ao salvar, com permissão de administrador no Supabase.
+- Se o produto falhar depois do upload, a URL fica no formulário para repetir
+  o salvamento sem reenviar o arquivo.
+- Imagens antigas não são excluídas automaticamente do Storage.
+
+## Banco existente e upgrade completo
+O supabase_upgrade.sql também inclui o upload na seção 26.
+Ele é um upgrade para as tabelas existentes, não uma instalação do banco do zero.
+As instruções anteriores abaixo são mantidas para quem ainda precisa configurar
+o restante do projeto; para somente esta atualização, siga o procedimento acima.
+
+## Verificações desta entrega
+Sintaxe JavaScript, referências locais, integridade das imagens e conteúdo do ZIP
+verificados. Fluxos de upload, edição por URL, validação de arquivo e recuperação
+após falha testados com Supabase simulado. O SQL não foi executado no seu projeto
+e o envio real ainda precisa ser validado após a instalação.
+
+---
+
 # JMG STORE — projeto final revisado
 
 Projeto da JMG STORE com Supabase, checkout via WhatsApp e painel administrativo.

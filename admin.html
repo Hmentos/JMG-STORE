@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin.css?v=6">
 </head>
 <body>
   <div id="loading" class="loading-screen"><div class="spinner"></div><p>Carregando painel...</p></div>
@@ -91,13 +91,22 @@
           <label>Preço (R$)<input id="productPrice" type="number" min="0" step="0.01" required></label>
           <label>Estoque<input id="productStock" type="number" min="0" step="1" required></label>
           <label>Tamanhos <small>ex.: P, M, G, GG</small><input id="productSizes" placeholder="P, M, G, GG"></label>
-          <label>Imagem (URL)<input id="productImage" placeholder="https://..." autocomplete="off"><small class="muted">Cole o link direto da imagem. Upload de arquivo será adicionado na próxima etapa.</small></label>
+          <div class="product-image-upload">
+            <label for="productImageFile">Imagem do dispositivo</label>
+            <input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="productImageHelp productImageStatus">
+            <small id="productImageHelp" class="muted">Escolha uma imagem JPG, PNG, WebP ou GIF de até 5 MB. Ela será enviada ao salvar o produto.</small>
+            <button id="clearProductImageFile" type="button" class="mini-btn" hidden>Cancelar seleção</button>
+            <label for="productImage">Ou cole o link da imagem</label>
+            <input id="productImage" placeholder="https://..." autocomplete="off">
+            <small id="productImageStatus" role="status" aria-live="polite"></small>
+          </div>
           <label>Etiqueta <small>ex.: Novo, Promoção</small><input id="productTag"></label>
           <label>Ícone <small>emoji opcional</small><input id="productIcon" placeholder="👕"></label>
         </div>
         <label>Descrição<textarea id="productDescription" rows="4" placeholder="Descrição do produto..."></textarea></label>
         <div id="imagePreview" class="image-preview"><span>Prévia da imagem</span></div>
         <div class="checks"><label class="check"><input id="productActive" type="checkbox" checked><span>Produto ativo na loja</span></label><label class="check"><input id="productFeatured" type="checkbox"><span>Produto em destaque</span></label></div>
+        <p id="productSaveError" class="product-save-error" role="alert" hidden></p>
         <div class="modal-actions"><button type="button" class="btn btn-light" data-close="productModal">Cancelar</button><button type="submit" class="btn btn-gold">Salvar produto</button></div>
       </form>
     </div>
@@ -108,6 +117,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=5"></script>
+  <script src="admin.js?v=6"></script>
 </body>
 </html>

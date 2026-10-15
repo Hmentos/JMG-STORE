@@ -10,7 +10,7 @@ const showMessage = (msg,type='success') => { const el=$('#message'); el.textCon
 const setLoading = (v) => $('#loading').classList.toggle('hidden',!v);
 
 function openModal(id){ $('#'+id).classList.add('open'); }
-function closeModal(id){ $('#'+id).classList.remove('open'); }
+function closeModal(id){ if(id==='productModal' && productSaving)return; $('#'+id).classList.remove('open'); }
 function categoryName(id){ return state.categories.find(c=>String(c.id)===String(id))?.name || 'Sem categoria'; }
 function normalizeStatus(s){ return ({recebido:'received',preparando:'preparing',enviado:'shipped',concluído:'completed',cancelado:'cancelled'})[s] || s || 'received'; }
 function statusLabel(s){ return ({received:'Recebido',preparing:'Preparando',shipped:'Enviado',completed:'Concluído',cancelled:'Cancelado',recebido:'Recebido',preparando:'Preparando',enviado:'Enviado',concluído:'Concluído',cancelado:'Cancelado'})[s] || s || 'Recebido'; }
@@ -90,8 +90,8 @@ function renderCustomers(){
   $('#customersTable').innerHTML=`<table><thead><tr><th>Cliente</th><th>Contato</th><th>Cadastro</th><th>Acesso</th><th>Ação</th></tr></thead><tbody>${arr.length?arr.map(c=>`<tr><td><div class="customer-name">${esc(c.full_name||'Sem nome')}</div><small class="muted">${esc(c.id)}</small></td><td>${esc(c.email||'—')}<br><span class="muted">${esc(c.phone||'—')}</span></td><td>${fmtDate(c.created_at)}</td><td><span class="badge ${c.role==='admin'?'warning':''}">${c.role==='admin'?'Administrador':'Cliente'}</span></td><td><button class="mini-btn" data-role-customer="${c.id}" data-current-role="${esc(c.role||'customer')}">${c.role==='admin'?'Tornar cliente':'Tornar admin'}</button></td></tr>`).join(''):'<tr><td colspan="5"><div class="empty">Nenhum cliente encontrado.</div></td></tr>'}</tbody></table>`;
 }
 
-function clearProductForm(){ $('#productId').value=''; $('#productName').value=''; $('#productPrice').value=''; $('#productStock').value='0'; $('#productSizes').value=''; $('#productImage').value=''; $('#productTag').value=''; $('#productIcon').value='👕'; $('#productDescription').value=''; $('#productActive').checked=true; $('#productFeatured').checked=false; $('#productModalTitle').textContent='Novo produto'; updateImagePreview(); }
-function editProduct(id){ const p=state.products.find(x=>String(x.id)===String(id)); if(!p)return; $('#productId').value=p.id;$('#productName').value=p.name||'';$('#productCategory').value=p.category_id||'';$('#productPrice').value=p.price||'';$('#productStock').value=p.stock??0;$('#productSizes').value=Array.isArray(p.sizes) ? p.sizes.join(',') : (typeof p.sizes === 'string' ? p.sizes.replace(/^[{]|[}]$/g,'').replace(/"/g,'') : '');$('#productImage').value=p.image_url||'';$('#productTag').value=p.tag||'';$('#productIcon').value=p.icon||'👕';$('#productDescription').value=p.description||'';$('#productActive').checked=!!p.active;$('#productFeatured').checked=!!p.featured;$('#productModalTitle').textContent='Editar produto';updateImagePreview();openModal('productModal'); }
+function clearProductForm(){ resetImageSelection(); $('#productSaveError').hidden=true; $('#productId').value=''; $('#productName').value=''; $('#productPrice').value=''; $('#productStock').value='0'; $('#productSizes').value=''; $('#productImage').value=''; $('#productTag').value=''; $('#productIcon').value='👕'; $('#productDescription').value=''; $('#productActive').checked=true; $('#productFeatured').checked=false; $('#productModalTitle').textContent='Novo produto'; updateImagePreview(); }
+function editProduct(id){ const p=state.products.find(x=>String(x.id)===String(id)); if(!p)return; resetImageSelection(); $('#productSaveError').hidden=true; $('#productId').value=p.id;$('#productName').value=p.name||'';$('#productCategory').value=p.category_id||'';$('#productPrice').value=p.price||'';$('#productStock').value=p.stock??0;$('#productSizes').value=Array.isArray(p.sizes) ? p.sizes.join(',') : (typeof p.sizes === 'string' ? p.sizes.replace(/^[{]|[}]$/g,'').replace(/"/g,'') : '');$('#productImage').value=p.image_url||'';$('#productTag').value=p.tag||'';$('#productIcon').value=p.icon||'👕';$('#productDescription').value=p.description||'';$('#productActive').checked=!!p.active;$('#productFeatured').checked=!!p.featured;$('#productModalTitle').textContent='Editar produto';updateImagePreview();openModal('productModal'); }
 function normalizeSizes(value){
   if(Array.isArray(value)) return value.map(v=>String(v).trim()).filter(Boolean);
   const text=String(value??'').trim();
@@ -101,10 +101,72 @@ function normalizeSizes(value){
   return clean.split(',').map(v=>v.trim()).filter(Boolean);
 }
 
-function updateImagePreview(){ const url=$('#productImage').value.trim(); $('#imagePreview').innerHTML=url?`<img src="${esc(url)}" alt="Prévia" onerror="this.parentElement.innerHTML='<span>Não foi possível carregar a imagem</span>'">`:'<span>Prévia da imagem</span>'; }
+
+const PRODUCT_IMAGE_BUCKET = 'jmg-product-images';
+const IMAGE_TYPES = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'};
+let productSaving = false;
+let imagePreviewUrl = null;
+
+function resetImageSelection(){
+  if(imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+  imagePreviewUrl=null;
+  $('#productImageFile').value='';
+  $('#productImage').disabled=false;
+  $('#clearProductImageFile').hidden=true;
+  $('#productImageStatus').textContent='';
+}
+
+function validateImageFile(file){
+  if(!Object.prototype.hasOwnProperty.call(IMAGE_TYPES,file.type))
+    throw new Error('Escolha uma imagem JPG, PNG, WebP ou GIF.');
+  if(!file.size || file.size > 5*1024*1024)
+    throw new Error('A imagem deve ter conteúdo e no máximo 5 MB.');
+}
+
+function selectProductImage(){
+  if(imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+  imagePreviewUrl=null;
+  const file=$('#productImageFile').files[0];
+  $('#productSaveError').hidden=true;
+  if(!file){resetImageSelection();updateImagePreview();return;}
+  try{
+    validateImageFile(file);
+    imagePreviewUrl=URL.createObjectURL(file);
+    $('#productImage').disabled=true;
+    $('#clearProductImageFile').hidden=false;
+    $('#productImageStatus').textContent=file.name+' — será enviada ao salvar.';
+  }catch(error){
+    resetImageSelection();
+    $('#productImageStatus').textContent=error.message;
+  }
+  updateImagePreview();
+}
+
+function updateImagePreview(){
+  const url=imagePreviewUrl || $('#productImage').value.trim();
+  const preview=$('#imagePreview');
+  preview.replaceChildren();
+  if(!url){preview.textContent='Prévia da imagem';return;}
+  const img=document.createElement('img');
+  img.alt='Prévia da imagem do produto';
+  img.onerror=()=>{preview.textContent='Não foi possível carregar a imagem. Escolha outro arquivo ou link.';};
+  img.src=url;
+  preview.appendChild(img);
+}
+
+async function uploadProductImage(file){
+  validateImageFile(file);
+  const path=state.user.id+'/'+crypto.randomUUID()+'.'+IMAGE_TYPES[file.type];
+  const bucket=supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET);
+  const {error}=await bucket.upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});
+  if(error) throw new Error('Não foi possível enviar a imagem. Confira a conexão e se o SQL de upload foi executado no Supabase. '+error.message);
+  const {data}=bucket.getPublicUrl(path);
+  return data.publicUrl;
+}
 
 async function saveProduct(e){
   e.preventDefault();
+  if(productSaving)return;
   const id=$('#productId').value.trim();
   const price=Number(String($('#productPrice').value).replace(',','.'));
   const stock=Number($('#productStock').value);
@@ -122,6 +184,25 @@ async function saveProduct(e){
     active:$('#productActive').checked,
     featured:$('#productFeatured').checked
   };
+  productSaving=true;
+  const controls=[...$('#productForm').querySelectorAll('input,select,textarea,button')];
+  const disabledStates=controls.map(el=>el.disabled);
+  const saveButton=$('#productForm button[type="submit"]');
+  const originalLabel=saveButton.textContent;
+  $('#productSaveError').hidden=true;
+  controls.forEach(el=>el.disabled=true);
+  try{
+    const file=$('#productImageFile').files[0];
+    if(file){
+      saveButton.textContent='Enviando imagem...';
+      payload.image_url=await uploadProductImage(file);
+      // Mantém a URL após o envio para permitir nova tentativa se o produto falhar.
+      $('#productImage').value=payload.image_url;
+      resetImageSelection();
+      controls.forEach(el=>el.disabled=true);
+      updateImagePreview();
+    }
+    saveButton.textContent='Salvando produto...';
   let res;
   if(id){
     // Não usamos .select().single() no UPDATE: com algumas configurações de RLS
@@ -132,19 +213,28 @@ async function saveProduct(e){
   }
   if(res.error){
     console.error('SUPABASE SAVE PRODUCT:',res.error);
-    showMessage(`Não foi possível salvar. ${res.error.message}${res.error.code?` (código ${res.error.code})`:''}`,'error');
-    return;
+    throw new Error('Não foi possível salvar o produto. '+res.error.message);
   }
   if(id){
     // Recarrega os produtos para mostrar exatamente o que ficou salvo no banco.
     await loadAll();
   }else{
-    if(!res.data){ showMessage('O Supabase não confirmou a criação do produto.','error'); return; }
+    if(!res.data) throw new Error('O Supabase não confirmou a criação do produto.');
     state.products.unshift(res.data);
     renderAll();
   }
   toast(id?'Produto atualizado com sucesso!':'Produto criado com sucesso!');
+  productSaving=false;
   closeModal('productModal');
+  }catch(error){
+    $('#productSaveError').textContent=error.message || 'Não foi possível salvar. Tente novamente.';
+    $('#productSaveError').hidden=false;
+  }finally{
+    productSaving=false;
+    controls.forEach((el,i)=>el.disabled=disabledStates[i]);
+    $('#productImage').disabled=!!$('#productImageFile').files[0];
+    saveButton.textContent=originalLabel;
+  }
 }
 async function toggleProduct(id){
   const p=state.products.find(x=>String(x.id)===String(id));
@@ -216,6 +306,8 @@ function bindEvents(){
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>showSection(b.dataset.go)));
   $('#refreshAll').addEventListener('click',loadAll); $('#newProductBtn').addEventListener('click',()=>{clearProductForm();openModal('productModal')});
   $('#productForm').addEventListener('submit',saveProduct); $('#categoryForm').addEventListener('submit',addCategory);
+  $('#productImageFile').addEventListener('change',selectProductImage);
+  $('#clearProductImageFile').addEventListener('click',()=>{resetImageSelection();updateImagePreview();});
   $('#productImage').addEventListener('input',updateImagePreview); ['productSearch','productStatusFilter'].forEach(id=>$('#'+id).addEventListener('input',renderProducts));
   ['orderSearch','orderStatusFilter'].forEach(id=>$('#'+id).addEventListener('input',renderOrders)); $('#customerSearch').addEventListener('input',renderCustomers);
   $('#logoutBtn').addEventListener('click',async()=>{await supabaseClient.auth.signOut();window.location.href='index.html';});
